@@ -1,0 +1,134 @@
+/* Pure CSS with -3 suffix and all colors inlined */
+.sidebar-3 {
+  display: flex;
+  flex-direction: column;
+  background-color: #1e293b;
+  border-right: 1px solid #334155;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-header-3 {
+  padding: 24px 16px 16px;
+  border-bottom: 1px solid #334155;
+}
+
+.sidebar-title-3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.sources-list-3 {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.source-item-3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.source-item-3:hover {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-color: #6366f1;
+}
+
+.source-item-3.active-3 {
+  background-color: rgba(99, 102, 241, 0.2);
+  border-color: #6366f1;
+}
+
+.source-icon-3 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(99, 102, 241, 0.15);
+  border-radius: 6px;
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+.source-info-3 {
+  flex: 1;
+  min-width: 0;
+}
+
+.source-title-3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-type-3 {
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: capitalize;
+}
+
+.delete-btn-3 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.source-item-3:hover .delete-btn-3 {
+  opacity: 1;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.sidebar-footer-3 {
+  padding: 16px;
+  border-top: 1px solid #334155;
+}
+
+.new-chat-btn-3 {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.new-chat-btn-3:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+}
+
+@media (max-width: 1024px) {
+  .sidebar-3 {
+    display: none;
+  }
+}

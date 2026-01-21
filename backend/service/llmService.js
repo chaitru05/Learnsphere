@@ -46,7 +46,7 @@ Generate the following:
     - Keep it readable and labeled.
 
 5. **Course Outline**
-    - Suggest 3–5 logical chapters for learning progression.
+    - Suggest 3–6 logical chapters for learning progression.
 
 ### Output Format
 Output **only** valid JSON that passes a linter. Pay close attention to syntax,

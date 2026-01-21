@@ -9,7 +9,9 @@ export default function Sidebar({ userName, credits, totalCredits, usedCredits, 
   const progressPercentage = (usedCredits / totalCredits) * 100
   const handleLogout = () => navigate("/")
   const isDisabled = credits === 0
-
+  const handleClick = () => {
+    navigate("/chat-with-pdf");
+  }
   return (
     <aside className="sidebar-1">
       <div className="sidebar-header-1">
@@ -27,6 +29,13 @@ export default function Sidebar({ userName, credits, totalCredits, usedCredits, 
       >
         <Plus size={20} />
         Create New
+      </button>
+      <button
+        className="create-btn-1"
+       onClick={handleClick}
+      >
+        <Plus size={20} />
+        chat with pdf
       </button>
 
       <nav className="sidebar-nav-1">

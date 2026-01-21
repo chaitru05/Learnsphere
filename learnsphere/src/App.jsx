@@ -17,6 +17,7 @@ import Testimonials from "./components/Testimonials";
 import CTA from "./components/CTA";
 import Footer from "./components/Footer";
 import { ThemeProvider } from "./context/ThemeContext";
+import ChatpdfDashboard from "./Chatpdf/ChatpdfDashboard";  
 function HomePage() {
   const [scrollY, setScrollY] = useState(0)
 
@@ -49,13 +50,14 @@ function App() {
       <CreditsProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<Home />} />
             <Route path="/getstarted" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/inputform" element={<InputForm />} />
             {/* ✅ make sure this param name matches useParams in StudyMaterialDetail */}
             <Route path="/study-material/:materialId" element={<StudyMaterialDetail />} />
             <Route path="/course/:materialId" element={<Index />} />
+            <Route path="/chat-with-pdf" element={<ChatpdfDashboard/>} />
           </Routes>
         </BrowserRouter>
       </CreditsProvider>
