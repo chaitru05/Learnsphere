@@ -7,9 +7,19 @@ import { Worker } from "bullmq";
 import { processIngestionJob } from "../utils/ingestionProcessor.js";
 
 // 🔥 FIX: Redis must use maxRetriesPerRequest: null
-const connection = new IORedis(process.env.REDIS_URL, {
+// 🔥 FIX: Redis must use maxRetriesPerRequest: null
+const connection = new IORedis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
   maxRetriesPerRequest: null,
+  retryStrategy: (times) => {
+    if (times > 3) {
+      console.warn("⚠️ Redis connection failed. Worker skipped.");
+      return null;
+    }
+    return Math.min(times * 100, 3000);
+  }
 });
+
+connection.on("error", () => { }); // Prevent crash on error
 
 // 🔥 FIX: Worker MUST connect to MongoDB
 async function connectMongo() {

@@ -1,9 +1,13 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
-import JSON5 from "json5"; // Import JSON5 at the top
+import JSON5 from "json5";
 dotenv.config();
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({
+  model: "gemini-flash-latest",
+});
 
 export const generateStudyMaterial = async (data) => {
   const { title, subject, goal, academicLevel, difficulty, language, learningStyle, keywords } = data;
@@ -49,8 +53,7 @@ Generate the following:
     - Suggest 3–6 logical chapters for learning progression.
 
 ### Output Format
-Output **only** valid JSON that passes a linter. Pay close attention to syntax,
-especially commas between array elements and object properties.
+Output **only** valid JSON. The structure must be EXACTLY as follows:
 
 {
   "notes": "long and detailed notes as a formatted string with markdown headings and bullet points",
@@ -61,58 +64,46 @@ especially commas between array elements and object properties.
 }
 `;
 
-  const completion = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.65,
-    response_format: { type: "json_object" },
-  });
-
-  let outputText = completion.choices[0].message.content;
-
-  if (!outputText) {
-    throw new Error("Received empty response from model");
-  }
-
-  // 🧹 Clean up extra markdown wrappers
-  outputText = outputText
-    .replace(/^```json/i, "")
-    .replace(/^```/, "")
-    .replace(/```$/, "")
-    .trim();
-
-  // 🧼 Normalize weird characters & ensure safe JSON parsing
-  const sanitized = outputText
-    // --- NEW FIX: Replace non-breaking spaces (U+00A0) with regular spaces ---
-    // JSON.parse() fails on these, but JSON5 can handle them.
-    // It's safer to replace them for all parsers.
-    .replace(/\u00A0/g, " ")
-
-    // KEEP THIS: Fixes invalid escape sequences like \[ and \( inside strings
-    .replace(/\\(?!["\\/bfnrtu])/g, "\\\\")
-    
-    // KEEP THIS: Fixes trailing commas
-    .replace(/,(\s*[}\]])/g, "$1")
-    
-    // KEEP THIS: Fixes smart quotes
-    .replace(/“|”/g, '"')
-    .replace(/‘|’/g, "'")
-    .trim();
-
-  // 🧩 Attempt to parse safely
   try {
-    return JSON.parse(sanitized);
-  } catch (err) {
-    console.error("❌ Failed to parse model output (attempt 1 with JSON.parse):\n", sanitized);
-    
-    // Optional fallback: try a second pass with JSON5 for resilience
-    try {
-      return JSON5.parse(sanitized);
-    } catch (err2) {
-      // This is where your "missing comma" error was truly caught, as
-      // neither parser could handle it.
-      console.error("❌ Failed to parse model output (attempt 2 with JSON5):\n", sanitized);
-      throw new Error("Invalid JSON from model after all sanitization attempts");
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let outputText = response.text();
+
+    if (!outputText) {
+      throw new Error("Received empty response from Gemini model");
     }
+
+    // 🧹 Clean up extra markdown wrappers if present (Gemini sometimes adds them even with JSON mode)
+    outputText = outputText
+      .replace(/^```json/i, "")
+      .replace(/^```/, "")
+      .replace(/```$/, "")
+      .trim();
+
+    // 🧼 Normalize & Parse
+    // Using the same robust parsing logic as before
+    const sanitized = outputText
+      .replace(/\u00A0/g, " ")
+      .replace(/\\(?!["\\/bfnrtu])/g, "\\\\")
+      .replace(/,(\s*[}\]])/g, "$1") // Fix trailing commas
+      .replace(/“|”/g, '"')          // Fix smart quotes
+      .replace(/‘|’/g, "'")
+      .trim();
+
+    try {
+      return JSON.parse(sanitized);
+    } catch (err) {
+      console.error("❌ Failed to parse Gemini output (attempt 1 with JSON.parse):\n", sanitized);
+      // Fallback to JSON5
+      try {
+        return JSON5.parse(sanitized);
+      } catch (err2) {
+        console.error("❌ Failed to parse Gemini output (attempt 2 with JSON5):\n", sanitized);
+        throw new Error("Invalid JSON from model after all sanitization attempts");
+      }
+    }
+  } catch (error) {
+    console.error("❌ Gemini API Error:", error);
+    throw error;
   }
 };

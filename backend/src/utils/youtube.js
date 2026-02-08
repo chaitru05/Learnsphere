@@ -1,19 +1,40 @@
-// Real YouTube transcript implementation using the 'youtube-transcript' library
-// Install first:  npm install youtube-transcript
+// Real YouTube transcript implementation using 'youtubei.js'
+// Supports auto-generated captions and is more robust.
 
-import { YoutubeTranscript } from 'youtube-transcript'
+import { Innertube } from 'youtubei.js';
+
+let youtube = null;
+
+async function getInnertube() {
+  if (!youtube) {
+    youtube = await Innertube.create();
+  }
+  return youtube;
+}
 
 export async function getYoutubeTranscript(urlOrId) {
-  // extract video id if user passes a full URL
-  const idMatch = urlOrId.match(/([\w-]{11})$/)
-  const id = idMatch ? idMatch[1] : urlOrId
+  // extract video id
+  const idMatch = urlOrId.match(/([\w-]{11})$/);
+  const id = idMatch ? idMatch[1] : urlOrId;
 
   try {
-    const transcript = await YoutubeTranscript.fetchTranscript(id)
-    // transcript = [{ text: "hello", offset: 1, duration: 3 }, ...]
-    return transcript.map(t => t.text)
+    const yt = await getInnertube();
+    const info = await yt.getInfo(id);
+
+    const transcriptData = await info.getTranscript();
+
+    if (!transcriptData || !transcriptData.transcript) {
+      throw new Error("No transcript available");
+    }
+
+    // specific to youtubei.js (Innertube) structure
+    const lines = transcriptData.transcript.content.body.initial_segments.map(
+      (seg) => seg.snippet.text
+    );
+
+    return lines;
   } catch (err) {
-    console.error("YouTube transcript error:", err)
-    return ["Transcript unavailable."]
+    console.error("YouTube transcript error:", err.message);
+    return null;
   }
 }

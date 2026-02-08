@@ -20,9 +20,12 @@ router.post("/:notebookId", async (req, res) => {
 
     console.log("🔍 Searching Pinecone...");
     const matches = await queryVectors(question, 6, { notebookId });
+    console.log(`🔍 Found ${matches.length} matches in Pinecone.`);
+    matches.forEach(m => console.log(`  - Match: ${m.id} (Score: ${m.score})`));
 
     const vectorIds = matches.map((m) => m.id);
     const chunks = await Chunk.find({ vectorId: { $in: vectorIds } });
+    console.log(`🔍 Found ${chunks.length} chunks in MongoDB for these vector IDs.`);
 
     const context = chunks
       .map((c) => `Source: ${c.sourceId}\n${c.text}`)

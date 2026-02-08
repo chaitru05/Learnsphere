@@ -1,0 +1,33 @@
+✅ Connected to MongoDB
+
+🔍 Found 5 recent sources:
+- Source ID: 6988936607c717b7df5ee28d
+  Type: pdf
+  Name: samplese1.pdf
+  Status: ingested
+  Notebook ID: 6988935a07c717b7df5ee28b
+  ✅ Chunks in DB: 31
+- Source ID: 698891998c01171ebb133800
+  Type: pdf
+  Name: samplese1.pdf
+  Status: ingested
+  Notebook ID: 6988918b8c01171ebb1337fe
+  ✅ Chunks in DB: 31
+- Source ID: 69888ff0588db2c32057135f
+  Type: pdf
+  Name: samplese1.pdf
+  Status: ingested
+  Notebook ID: 69888fe2588db2c32057135d
+  ✅ Chunks in DB: 31
+- Source ID: 69888e310734c93d7a1dc73d
+  Type: pdf
+  Name: samplese1.pdf
+  Status: ingested
+  Notebook ID: 69888dc10734c93d7a1dc739
+  ✅ Chunks in DB: 31
+- Source ID: 69888e150734c93d7a1dc73b
+  Type: pdf
+  Name: samplese1.pdf
+  Status: ingested
+  Notebook ID: 69888dc10734c93d7a1dc739
+  ✅ Chunks in DB: 31

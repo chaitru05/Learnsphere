@@ -19,6 +19,15 @@ export async function processIngestionJob(data) {
 
   rawText = rawText.replace(/\s+/g, " ").trim();
 
+  if (!rawText || rawText.length < 50) {
+    console.error("❌ Extraction failed or content too short:", rawText);
+    await Source.findByIdAndUpdate(sourceId, {
+      status: "failed",
+      metadata: { error: "Could not extract content from source." }
+    });
+    return;
+  }
+
   // 2️⃣ Chunk Text
   const chunks = chunkText(rawText, 1500, 300);
   console.log("🔍 Raw extracted text length:", rawText.length);

@@ -59,6 +59,7 @@ export async function extractFromUrl(url) {
 export async function extractFromYoutube(urlOrId) {
   try {
     const transcript = await getYoutubeTranscript(urlOrId);
+    if (!transcript) return "";
     return transcript.join(" ").replace(/\s+/g, " ").trim();
   } catch (err) {
     console.error("❌ YOUTUBE EXTRACT ERROR:", err);

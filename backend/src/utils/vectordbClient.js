@@ -25,10 +25,13 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 export async function embedWithGemini(text) {
   try {
     const model = genAI.getGenerativeModel({
-      model: "text-embedding-004", // 768-dim
+      model: "models/gemini-embedding-001", // 768-dim
     });
 
-    const result = await model.embedContent(text);
+    const result = await model.embedContent({
+      content: { role: "user", parts: [{ text }] },
+      outputDimensionality: 768,
+    });
     return result.embedding.values; // 768-dim float array
   } catch (err) {
     console.error("❌ Gemini Embedding Error:", err);
@@ -60,13 +63,20 @@ export async function queryVectors(questionText, topK = 6, filter = {}) {
       throw new Error("Empty query embedding");
     }
 
-    const response = await index.query({
+    console.log("🔍 Querying Pinecone with filter:", JSON.stringify(filter));
+
+    const queryRequest = {
       vector,
       topK,
       includeMetadata: true,
-      filter,
       includeValues: false,
-    });
+    };
+
+    if (filter && Object.keys(filter).length > 0) {
+      queryRequest.filter = filter;
+    }
+
+    const response = await index.query(queryRequest);
 
     return response.matches || [];
   } catch (err) {

@@ -1,0 +1,10 @@
+Testing search...
+🔍 Generating Gemini embedding for query...
+Matches found: 6
+Top match score: 0.0616763
+Top match metadata: {
+  chunkIndex: 5,
+  notebookId: '69355e084e156b8273f65931',
+  sourceId: '69355f8261476f25d710e231',
+  text: 'ds to meet changing customer’s needs. Q. Write short notes on : CMMI [10 Marks][May2007] Dr. Sharmila Rathod Section 1.01 1.3 Engineering Goals Programming has evolved over the years. Many modern software systems are much larger and more complex than common applications of the past. Older programming techniques have shown themselves to be grossly inadequate to implement these newer systems. From this need for more sophisticated programming techniques the discipline called Software Engineering was born. Software Engineering embodies many techniques that could arguably require volumes to describe. Generally such practices as top-down design, structured programming and design, pseudocode with iterative refinement, walk-throughs and OOP (Object Oriented Programming) are considered to be part of this discipline. Many advanced constructs in modern programming languages such as C++ were incorporated to meet the Software Engineering Goals given below. 1. All programming projects should begin with functional descriptions which become the highest level pseudocode. Every module and every routine, high or low level, should have a functional description approptiate to its level of abstraction. 2. Functional descriptions determine high level pseudocode should be iteratively refined to low level pseudo code. The pseudocode becomes internal documentation. 3. Pseudo code should be organized into modules, thus ultimately organizing the project into modules. 4. Computer code for all routines an'
+}
