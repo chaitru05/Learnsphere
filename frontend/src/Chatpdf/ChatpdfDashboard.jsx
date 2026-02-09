@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./chat.css";
 import Sidebar from "./Sidebar";
 import ChatSection from "./ChatSection";
@@ -25,6 +25,26 @@ export default function ChatpdfDashboard() {
   ]);
 
   // -------------------------------
+  // FETCH NOTEBOOKS (ON MOUNT)
+  // -------------------------------
+  useEffect(() => {
+    fetchNotebooks();
+  }, []);
+
+  const fetchNotebooks = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/notebook`);
+      const data = await res.json();
+      // data should be array of notebooks with populated 'sources'
+      setNotebooks(data);
+    } catch (err) {
+      console.error("Failed to fetch notebooks:", err);
+    }
+  };
+
+  const [activeSource, setActiveSource] = useState(null);
+
+  // -------------------------------
   // CREATE NOTEBOOK
   // -------------------------------
   const handleCreateNotebook = async (notebookName) => {
@@ -37,15 +57,9 @@ export default function ChatpdfDashboard() {
 
       const nb = await res.json();
 
-      const newNotebook = {
-        id: nb._id, // backend ID
-        name: nb.name,
-        createdDate: nb.createdAt,
-        sources: [],
-      };
-
-      setNotebooks((prev) => [...prev, newNotebook]);
-      setSelectedNotebook(newNotebook);
+      // Re-fetch to get consistent structure or just append
+      // For now, let's just append simplified version, but ideally re-fetch:
+      fetchNotebooks();
 
       setIsCreateNotebookOpen(false);
       setIsAddSourceOpen(true); // open "Add Source"
@@ -55,13 +69,14 @@ export default function ChatpdfDashboard() {
     }
   };
 
+
   // -------------------------------
   // UPLOAD SOURCE
   // -------------------------------
   const handleAddSource = async (source) => {
     try {
       const fd = new FormData();
-      fd.append("notebookId", selectedNotebook.id);
+      fd.append("notebookId", selectedNotebook._id || selectedNotebook.id);
       fd.append("sourceType", source.type);
 
       if (source.type === "pdf") {
@@ -86,30 +101,10 @@ export default function ChatpdfDashboard() {
       });
 
       const data = await uploadRes.json();
-      const sourceId = data.sourceId;
 
-      // -------------------------------
-      // ADD SOURCE IN UI
-      // -------------------------------
-      const updated = notebooks.map((nb) => {
-        if (nb.id === selectedNotebook.id) {
-          return {
-            ...nb,
-            sources: [
-              ...nb.sources,
-              {
-                id: sourceId,
-                title: source.title,
-                type: source.type,
-                date: new Date().toISOString().split("T")[0],
-              },
-            ],
-          };
-        }
-        return nb;
-      });
+      // Refresh notebooks to get the new source listing
+      await fetchNotebooks();
 
-      setNotebooks(updated);
       setIsAddSourceOpen(false);
 
     } catch (err) {
@@ -126,7 +121,7 @@ export default function ChatpdfDashboard() {
 
     try {
       const res = await fetch(
-        `${API_BASE_URL}/query/${selectedNotebook.id}`,
+        `${API_BASE_URL}/query/${selectedNotebook._id || selectedNotebook.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -159,11 +154,12 @@ export default function ChatpdfDashboard() {
   return (
     <div className="chat-pdf-container-3">
       <Sidebar
-        sources={selectedNotebook?.sources || []} // FIXED
-        selectedSource={null}
-        onSelectSource={() => {}}
+        sources={selectedNotebook?.sources || []}
+        selectedSource={activeSource}
+        onSelectSource={setActiveSource}
         selectedNotebook={selectedNotebook}
         notebooks={notebooks}
+        onSelectNotebook={setSelectedNotebook}
         onNewNotebook={() => setIsCreateNotebookOpen(true)}
       />
 
@@ -172,6 +168,8 @@ export default function ChatpdfDashboard() {
         onSendMessage={handleSendMessage}
         onAddSource={() => setIsAddSourceOpen(true)}
         selectedNotebook={selectedNotebook}
+        activeSource={activeSource}
+        onCloseSource={() => setActiveSource(null)}
       />
 
       <RightPanel />
