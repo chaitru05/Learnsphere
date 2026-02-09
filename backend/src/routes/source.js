@@ -17,4 +17,14 @@ router.get('/:sourceId/status', async (req, res) => {
   });
 });
 
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Source.findByIdAndDelete(id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 export default router;

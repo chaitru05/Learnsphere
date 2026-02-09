@@ -37,6 +37,15 @@ export default function ChatpdfDashboard() {
       const data = await res.json();
       // data should be array of notebooks with populated 'sources'
       setNotebooks(data);
+
+      // Update selectedNotebook if it exists to ensure sources are fresh
+      if (selectedNotebook) {
+        const currentId = selectedNotebook._id || selectedNotebook.id;
+        const updated = data.find(n => (n._id || n.id) === currentId);
+        if (updated) {
+          setSelectedNotebook(updated);
+        }
+      }
     } catch (err) {
       console.error("Failed to fetch notebooks:", err);
     }
@@ -57,8 +66,11 @@ export default function ChatpdfDashboard() {
 
       const nb = await res.json();
 
-      // Re-fetch to get consistent structure or just append
-      // For now, let's just append simplified version, but ideally re-fetch:
+      // Optimistically select and set
+      const newNb = { ...nb, sources: [] };
+      setSelectedNotebook(newNb);
+
+      // Re-fetch to get consistent structure
       fetchNotebooks();
 
       setIsCreateNotebookOpen(false);
@@ -107,10 +119,56 @@ export default function ChatpdfDashboard() {
 
       setIsAddSourceOpen(false);
 
+      setNotebooks(updated);
+      setIsAddSourceOpen(false);
+
     } catch (err) {
       console.error("Source upload failed:", err);
     }
   };
+
+  // -------------------------------
+  // DELETE NOTEBOOK
+  // -------------------------------
+  const handleDeleteNotebook = async (notebookId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/notebook/${notebookId}`, {
+        method: "DELETE"
+      });
+
+      if (res.ok) {
+        setNotebooks(prev => prev.filter(nb => (nb._id || nb.id) !== notebookId));
+        if ((selectedNotebook?._id || selectedNotebook?.id) === notebookId) {
+          setSelectedNotebook(null);
+          setActiveSource(null);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete notebook:", err);
+    }
+  };
+
+  // -------------------------------
+  // DELETE SOURCE
+  // -------------------------------
+  const handleDeleteSource = async (sourceId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/source/${sourceId}`, {
+        method: "DELETE"
+      });
+
+      if (res.ok) {
+        // Refresh logic - optimistic or re-fetch
+        await fetchNotebooks();
+        if (activeSource?._id === sourceId) {
+          setActiveSource(null);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete source:", err);
+    }
+  };
+
 
   // -------------------------------
   // CHAT MESSAGE
@@ -156,11 +214,16 @@ export default function ChatpdfDashboard() {
       <Sidebar
         sources={selectedNotebook?.sources || []}
         selectedSource={activeSource}
-        onSelectSource={setActiveSource}
+        onSelectSource={(source) => {
+          console.log("Selected Source:", source);
+          setActiveSource(source);
+        }}
         selectedNotebook={selectedNotebook}
         notebooks={notebooks}
         onSelectNotebook={setSelectedNotebook}
         onNewNotebook={() => setIsCreateNotebookOpen(true)}
+        onDeleteNotebook={handleDeleteNotebook}
+        onDeleteSource={handleDeleteSource}
       />
 
       <ChatSection

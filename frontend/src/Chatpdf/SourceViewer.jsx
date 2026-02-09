@@ -20,12 +20,30 @@ export default function SourceViewer({ source, onClose }) {
                 // Extract video ID from URL
                 let videoId = "";
                 try {
-                    const urlObj = new URL(source.metadata?.url || source.storagePath);
+                    const urlStr = source.metadata?.url || source.storagePath || "";
+                    if (!urlStr) throw new Error("No URL provided");
+
+                    const urlObj = new URL(urlStr);
+
                     if (urlObj.hostname.includes("youtube.com")) {
                         videoId = urlObj.searchParams.get("v");
+                        // Handle embedding URL if already embedded
+                        if (urlObj.pathname.includes("/embed/")) {
+                            videoId = urlObj.pathname.split("/embed/")[1];
+                        }
                     } else if (urlObj.hostname.includes("youtu.be")) {
                         videoId = urlObj.pathname.slice(1);
                     }
+
+                    // Simple regex fallback if URL parsing fails or returns empty for some reason but string contains ID
+                    if (!videoId) {
+                        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                        const match = urlStr.match(regExp);
+                        if (match && match[2].length === 11) {
+                            videoId = match[2];
+                        }
+                    }
+
                 } catch (e) {
                     console.error("Invalid YouTube URL", e);
                 }
@@ -50,11 +68,12 @@ export default function SourceViewer({ source, onClose }) {
                 );
             case "url":
             case "website":
+                const displayUrl = source.metadata?.url || source.storagePath || source.originalName || "#";
                 return (
                     <div className="url-container">
                         <p>External Website:</p>
-                        <a href={source.metadata?.url || source.storagePath} target="_blank" rel="noopener noreferrer" className="external-link">
-                            {source.metadata?.url || source.storagePath} <ExternalLink size={16} />
+                        <a href={displayUrl} target="_blank" rel="noopener noreferrer" className="external-link">
+                            {displayUrl} <ExternalLink size={16} />
                         </a>
                         <p className="note">Websites cannot be embedded directly due to security restrictions. Please open in a new tab.</p>
                     </div>

@@ -32,4 +32,16 @@ router.get('/:id', async (req, res) => {
     if (!nb) return res.status(404).json({ error: 'not found' })
     res.json(nb)
 })
+
+router.delete('/:id', async (req, res) => {
+    try {
+        await Notebook.findByIdAndDelete(req.params.id);
+        // Optional: delete associated sources too?
+        // await Source.deleteMany({ notebookId: req.params.id }); 
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router
